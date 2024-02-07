@@ -4,11 +4,12 @@ import java.awt.event.*;
 import java.util.Random;
 
 public class GamePanel extends JPanel implements ActionListener {
-    static final int SCREEN_WIDTH = 600;
+    static final int SCREEN_WIDTH = 700;
     static final int SCREEN_HEIGHT = 650;
     static final int TOP_PANEL_HEIGHT = 50;
+    static  final int RIGHT_PANEL_WIDTH = 100;
     static final int UNIT_SIZE = 25; //size of items
-    static final int GAME_UNITS = (SCREEN_WIDTH*SCREEN_HEIGHT)/UNIT_SIZE;
+    static final int GAME_UNITS = ((SCREEN_WIDTH- RIGHT_PANEL_WIDTH)*(SCREEN_HEIGHT-TOP_PANEL_HEIGHT))/UNIT_SIZE;
    static final int DELAY = 75; //the higher the number the slower the game
    final int x[] = new int[GAME_UNITS];
    final int y[] = new int[GAME_UNITS];
@@ -32,6 +33,7 @@ public class GamePanel extends JPanel implements ActionListener {
         this.setFocusable(true);
         this.addKeyListener(new MyKeyAdapter());
 
+        //score panel
         scoreLabel = new JLabel("Score: " + applesEaten);
         scoreLabel.setFont(new Font("Ink Free", Font.BOLD, 20));
         scoreLabel.setForeground(Color.red);
@@ -43,6 +45,16 @@ public class GamePanel extends JPanel implements ActionListener {
 
         this.setLayout(new BorderLayout());
         this.add(topPanel, BorderLayout.NORTH);
+
+        //difficulty panel
+        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        rightPanel.setPreferredSize(new Dimension(RIGHT_PANEL_WIDTH, (SCREEN_HEIGHT-TOP_PANEL_HEIGHT)));
+        rightPanel.setBackground(Color.DARK_GRAY);
+        rightPanel.add(new JButton("Easy"));
+        rightPanel.add(new JButton("Hard"));
+        rightPanel.add(new JButton("Surprise me"));
+        this.add(rightPanel, BorderLayout.EAST);
+
         startGame();
     }
     public void startGame() {
@@ -99,13 +111,15 @@ public class GamePanel extends JPanel implements ActionListener {
 
     }
     public void newApple(){
-        appleX = random.nextInt((int) (SCREEN_WIDTH/UNIT_SIZE))*UNIT_SIZE;
-        appleY = (int) TOP_PANEL_HEIGHT  + random.nextInt((int) ((SCREEN_HEIGHT - TOP_PANEL_HEIGHT) /UNIT_SIZE))*UNIT_SIZE;
+        appleX = ((random.nextInt((SCREEN_WIDTH - RIGHT_PANEL_WIDTH) / UNIT_SIZE)) * UNIT_SIZE);
+        appleY = ((random.nextInt((SCREEN_HEIGHT - TOP_PANEL_HEIGHT) / UNIT_SIZE)) * UNIT_SIZE) + TOP_PANEL_HEIGHT;
     }
+
     public void newMouse(){
-            mouseX = random.nextInt((int) (SCREEN_WIDTH / UNIT_SIZE)) * UNIT_SIZE;
-            mouseY = (int) TOP_PANEL_HEIGHT  + random.nextInt((int) ((SCREEN_HEIGHT - TOP_PANEL_HEIGHT) / UNIT_SIZE)) * UNIT_SIZE;
+        mouseX = ((random.nextInt((SCREEN_WIDTH - RIGHT_PANEL_WIDTH) / UNIT_SIZE)) * UNIT_SIZE);
+        mouseY = ((random.nextInt((SCREEN_HEIGHT - TOP_PANEL_HEIGHT) / UNIT_SIZE)) * UNIT_SIZE) + TOP_PANEL_HEIGHT;
     }
+
 
     public boolean ifMouse(){
         if(bodyParts % 10 == 0) return true;
@@ -163,7 +177,7 @@ public class GamePanel extends JPanel implements ActionListener {
             running = false;
         }
         //checks if head touches right border
-        if(x[0] > SCREEN_WIDTH){
+        if(x[0] > SCREEN_WIDTH - RIGHT_PANEL_WIDTH){
             running = false;
         }
         //checks if head touches top border
@@ -184,12 +198,12 @@ public class GamePanel extends JPanel implements ActionListener {
         g.setColor(Color.red);
         g.setFont(new Font("Ink Free", Font.BOLD, 40));
         FontMetrics metrics1 = getFontMetrics(g.getFont());
-        g.drawString("Score: " + applesEaten, (SCREEN_WIDTH - metrics1.stringWidth("Score: " + applesEaten))/2,g.getFont().getSize());
+        g.drawString("Score: " + applesEaten, ((SCREEN_WIDTH - RIGHT_PANEL_WIDTH) - metrics1.stringWidth("Score: " + applesEaten))/2,g.getFont().getSize());
         //game over text
         g.setColor(Color.red);
         g.setFont(new Font("Ink Free", Font.BOLD, 75));
         FontMetrics metrics2 = getFontMetrics(g.getFont());
-        g.drawString("Game Over", (SCREEN_WIDTH - metrics2.stringWidth("Game Over"))/2,SCREEN_HEIGHT/2);
+        g.drawString("Game Over", ((SCREEN_WIDTH - RIGHT_PANEL_WIDTH) - metrics2.stringWidth("Game Over"))/2,SCREEN_HEIGHT/2);
     }
     @Override
     public void actionPerformed(ActionEvent e) {
