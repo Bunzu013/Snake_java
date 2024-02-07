@@ -15,6 +15,8 @@ public class GamePanel extends JPanel implements ActionListener {
     int applesEaten;
     int appleX;
     int appleY;
+    int mouseX;
+    int mouseY;
     char direction = 'R'; // snake begin by going right
     boolean running = false;
     Timer timer;
@@ -30,17 +32,18 @@ public class GamePanel extends JPanel implements ActionListener {
     }
     public void startGame() {
         newApple();
+        newMouse();
         running = true;
         timer = new Timer(DELAY,this);
         timer.start();
 
     }
     public void paintComponent(Graphics g) {
-    super.paintComponent(g);
-    draw(g);
+        super.paintComponent(g);
+        draw(g);
     }
-    public void draw(Graphics g) {
 
+    public void draw(Graphics g) {
         if(running) {
             /*
             for (int i = 0; i < SCREEN_HEIGHT / UNIT_SIZE; i++) {
@@ -50,6 +53,12 @@ public class GamePanel extends JPanel implements ActionListener {
             //apple
             g.setColor(Color.red);
             g.fillOval(appleX, appleY, UNIT_SIZE, UNIT_SIZE);
+
+            //mouse
+            if(ifMouse()) {
+                g.setColor(Color.GRAY);
+                g.fillRect(mouseX, mouseY, UNIT_SIZE, UNIT_SIZE);
+            }
             //sake
             for (int i = 0; i < bodyParts; i++) {
                 if (i == 0) {
@@ -75,6 +84,17 @@ public class GamePanel extends JPanel implements ActionListener {
         appleX = random.nextInt((int) (SCREEN_WIDTH/UNIT_SIZE))*UNIT_SIZE;
         appleY = random.nextInt((int) (SCREEN_HEIGHT/UNIT_SIZE))*UNIT_SIZE;
     }
+    public void newMouse(){
+      //  if(ifMouse()) {
+            mouseX = random.nextInt((int) (SCREEN_WIDTH / UNIT_SIZE)) * UNIT_SIZE;
+            mouseY = random.nextInt((int) (SCREEN_HEIGHT / UNIT_SIZE)) * UNIT_SIZE;
+        //}
+    }
+
+    public boolean ifMouse(){
+        if(bodyParts % 10 == 0) return true;
+        else return false;
+    }
     public void move() {
         for(int i=bodyParts; i>0;i--){
             x[i] = x[i-1];
@@ -94,12 +114,21 @@ public class GamePanel extends JPanel implements ActionListener {
             case 'R':
                 x[0] = x[0] + UNIT_SIZE;
                 break;
+            default:
+                break;
         }
     }
     public void checkApple() {
         if((x[0] == appleX) && (y[0] == appleY)){
             bodyParts++;
             applesEaten++;
+            newApple();
+        }
+    }
+    public void checkMouse() {
+        if((x[0] == mouseX) && (y[0] == mouseY)){
+            bodyParts++;
+            applesEaten += 2;
             newApple();
         }
     }
@@ -148,6 +177,7 @@ public class GamePanel extends JPanel implements ActionListener {
         if(running){
             move();
             checkApple();
+            checkMouse();
             checkCollisions();
         }
         repaint();
