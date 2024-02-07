@@ -41,6 +41,9 @@ public class GamePanel extends JPanel implements ActionListener {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         draw(g);
+        if (ifMouse()) {
+            checkMouse();
+        }
     }
 
     public void draw(Graphics g) {
