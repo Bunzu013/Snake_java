@@ -4,10 +4,10 @@ import java.awt.event.*;
 import java.util.Random;
 
 public class GamePanel extends JPanel implements ActionListener {
-    static final int SCREEN_WIDTH = 700;
+    static final int SCREEN_WIDTH = 750;
     static final int SCREEN_HEIGHT = 650;
     static final int TOP_PANEL_HEIGHT = 50;
-    static  final int RIGHT_PANEL_WIDTH = 100;
+    static  final int RIGHT_PANEL_WIDTH = 150;
     static final int UNIT_SIZE = 25; //size of items
     static final int GAME_UNITS = ((SCREEN_WIDTH- RIGHT_PANEL_WIDTH)*(SCREEN_HEIGHT-TOP_PANEL_HEIGHT))/UNIT_SIZE;
    static final int DELAY = 75; //the higher the number the slower the game
@@ -47,15 +47,32 @@ public class GamePanel extends JPanel implements ActionListener {
         this.add(topPanel, BorderLayout.NORTH);
 
         //difficulty panel
-        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JPanel rightPanel = new JPanel();
+        rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
         rightPanel.setPreferredSize(new Dimension(RIGHT_PANEL_WIDTH, (SCREEN_HEIGHT-TOP_PANEL_HEIGHT)));
         rightPanel.setBackground(Color.DARK_GRAY);
-        rightPanel.add(new JButton("Easy"));
-        rightPanel.add(new JButton("Hard"));
-        rightPanel.add(new JButton("Surprise me"));
+        JButton easyButton = createButton("Easy");
+        JButton hardButton = createButton("Hard");
+        JButton surpriseButton = createButton("Surprise me");
+        JButton restartButton = createButton("Restart");
+        //restartButton.setAlignmentY(Component.BOTTOM_ALIGNMENT);
+
+        rightPanel.add(easyButton);
+        rightPanel.add(hardButton);
+        rightPanel.add(surpriseButton);
+        rightPanel.add(Box.createVerticalGlue());
+        rightPanel.add(restartButton);
         this.add(rightPanel, BorderLayout.EAST);
 
         startGame();
+    }
+
+    private JButton createButton(String text) {
+        JButton button = new JButton(text);
+        button.setAlignmentX(Component.CENTER_ALIGNMENT);
+        button.setMaximumSize(new Dimension(RIGHT_PANEL_WIDTH, 30));
+        button.setMinimumSize(new Dimension(RIGHT_PANEL_WIDTH, 30));
+        return button;
     }
     public void startGame() {
         newApple();
@@ -67,6 +84,7 @@ public class GamePanel extends JPanel implements ActionListener {
         x[0] = 0;
         y[0] = TOP_PANEL_HEIGHT + SCREEN_HEIGHT /2;
     }
+
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         draw(g);
@@ -122,8 +140,7 @@ public class GamePanel extends JPanel implements ActionListener {
 
 
     public boolean ifMouse(){
-        if(bodyParts % 10 == 0) return true;
-        else return false;
+        return bodyParts % 10 == 0;
     }
     public void move() {
         for(int i=bodyParts; i>0;i--){
