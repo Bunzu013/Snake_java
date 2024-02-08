@@ -24,6 +24,10 @@ public class GamePanel extends JPanel implements ActionListener {
     Timer timer;
     Random random;
     JLabel scoreLabel;
+    JButton easyButton;
+    JButton hardButton;
+    JButton surpriseButton;
+    JButton restartButton;
 
     GamePanel() {
         long seed = System.currentTimeMillis();
@@ -51,11 +55,10 @@ public class GamePanel extends JPanel implements ActionListener {
         rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
         rightPanel.setPreferredSize(new Dimension(RIGHT_PANEL_WIDTH, (SCREEN_HEIGHT-TOP_PANEL_HEIGHT)));
         rightPanel.setBackground(Color.DARK_GRAY);
-        JButton easyButton = createButton("Easy");
-        JButton hardButton = createButton("Hard");
-        JButton surpriseButton = createButton("Surprise me");
-        JButton restartButton = createButton("Restart");
-        //restartButton.setAlignmentY(Component.BOTTOM_ALIGNMENT);
+        this.easyButton = createButton("Easy");
+        this.hardButton = createButton("Hard");
+        this.surpriseButton = createButton("Surprise me");
+        this.restartButton = createButton("Restart");
 
         rightPanel.add(easyButton);
         rightPanel.add(hardButton);
@@ -63,10 +66,35 @@ public class GamePanel extends JPanel implements ActionListener {
         rightPanel.add(Box.createVerticalGlue());
         rightPanel.add(restartButton);
         this.add(rightPanel, BorderLayout.EAST);
-
+        initializeButtons();
         startGame();
     }
+    private void initializeButtons() {
+        easyButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            }
+        });
 
+        hardButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            }
+        });
+
+        surpriseButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            }
+        });
+
+        restartButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                restartGame();
+            }
+        });
+    }
     private JButton createButton(String text) {
         JButton button = new JButton(text);
         button.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -84,7 +112,26 @@ public class GamePanel extends JPanel implements ActionListener {
         x[0] = 0;
         y[0] = TOP_PANEL_HEIGHT + SCREEN_HEIGHT /2;
     }
+    public void restartGame() {
+        applesEaten = 0;
+        bodyParts = 6;
+        direction = 'R';
+        running = false;
+        scoreLabel.setText("Score: " + applesEaten);
+        newApple();
+        newMouse();
+        for (int i = 0; i < bodyParts; i++) {
+            x[i] = 0;
+            y[i] = TOP_PANEL_HEIGHT + SCREEN_HEIGHT / 2;
+        }
 
+        if (timer != null) {
+            timer.stop();
+
+        }
+        this.requestFocusInWindow();
+       startGame();
+    }
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         draw(g);
@@ -234,6 +281,8 @@ public class GamePanel extends JPanel implements ActionListener {
         }
         repaint();
     }
+
+
     public class MyKeyAdapter extends KeyAdapter {
         @Override
         public void keyPressed(KeyEvent e) {
