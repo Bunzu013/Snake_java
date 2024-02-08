@@ -5,29 +5,33 @@ import java.util.Random;
 
 public class GamePanel extends JPanel implements ActionListener {
     static final int SCREEN_WIDTH = 750;
-    static final int SCREEN_HEIGHT = 650;
-    static final int TOP_PANEL_HEIGHT = 50;
-    static  final int RIGHT_PANEL_WIDTH = 150;
+    static final int SCREEN_HEIGHT = 700;
+    static final int TOP_PANEL_HEIGHT = 100;
+    static final int RIGHT_PANEL_WIDTH = 150;
     static final int UNIT_SIZE = 25; //size of items
-    static final int GAME_UNITS = ((SCREEN_WIDTH- RIGHT_PANEL_WIDTH)*(SCREEN_HEIGHT-TOP_PANEL_HEIGHT))/UNIT_SIZE;
-   static final int DELAY = 75; //the higher the number the slower the game
-   final int x[] = new int[GAME_UNITS];
-   final int y[] = new int[GAME_UNITS];
-   int bodyParts = 6;  // initial snake size
-    int applesEaten;
+    static final int GAME_UNITS = ((SCREEN_WIDTH - RIGHT_PANEL_WIDTH) * (SCREEN_HEIGHT - TOP_PANEL_HEIGHT)) / UNIT_SIZE;
+    static final int DELAY = 75; //the higher the number the slower the game
+    final int x[] = new int[GAME_UNITS];
+    final int y[] = new int[GAME_UNITS];
+    int bodyParts = 6;  // initial snake size
+    int applesEaten = 0;
+    int bestScore = 0;
     int appleX;
     int appleY;
     int mouseX;
     int mouseY;
     char direction = 'R'; // snake begin by going right
+    char difficultyLevel = 'E';
     boolean running = false;
     Timer timer;
     Random random;
     JLabel scoreLabel;
+    JLabel bestScoreLabel;
     JButton easyButton;
     JButton hardButton;
     JButton surpriseButton;
     JButton restartButton;
+
 
     GamePanel() {
         long seed = System.currentTimeMillis();
@@ -38,14 +42,26 @@ public class GamePanel extends JPanel implements ActionListener {
         this.addKeyListener(new MyKeyAdapter());
 
         //score panel
+        JPanel topPanel = new JPanel(new GridBagLayout());
+        topPanel.setPreferredSize(new Dimension(SCREEN_WIDTH, TOP_PANEL_HEIGHT));
+        topPanel.setBackground(Color.DARK_GRAY);
+
         scoreLabel = new JLabel("Score: " + applesEaten);
         scoreLabel.setFont(new Font("Ink Free", Font.BOLD, 20));
         scoreLabel.setForeground(Color.red);
 
-        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        topPanel.setPreferredSize(new Dimension(SCREEN_WIDTH, TOP_PANEL_HEIGHT));
-        topPanel.setBackground(Color.DARK_GRAY);
-        topPanel.add(scoreLabel);
+        bestScoreLabel = new JLabel("Best score: " + bestScore);
+        bestScoreLabel.setFont(new Font("Ink Free", Font.BOLD, 15));
+        bestScoreLabel.setForeground(Color.black);
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.insets = new Insets(5, 10, 5, 10);
+
+        topPanel.add(scoreLabel, gbc);
+        gbc.gridy = 1;
+        topPanel.add(bestScoreLabel, gbc);
 
         this.setLayout(new BorderLayout());
         this.add(topPanel, BorderLayout.NORTH);
@@ -53,7 +69,7 @@ public class GamePanel extends JPanel implements ActionListener {
         //difficulty panel
         JPanel rightPanel = new JPanel();
         rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
-        rightPanel.setPreferredSize(new Dimension(RIGHT_PANEL_WIDTH, (SCREEN_HEIGHT-TOP_PANEL_HEIGHT)));
+        rightPanel.setPreferredSize(new Dimension(RIGHT_PANEL_WIDTH, (SCREEN_HEIGHT - TOP_PANEL_HEIGHT)));
         rightPanel.setBackground(Color.DARK_GRAY);
         this.easyButton = createButton("Easy");
         this.hardButton = createButton("Hard");
@@ -65,26 +81,40 @@ public class GamePanel extends JPanel implements ActionListener {
         rightPanel.add(surpriseButton);
         rightPanel.add(Box.createVerticalGlue());
         rightPanel.add(restartButton);
+
         this.add(rightPanel, BorderLayout.EAST);
         initializeButtons();
         startGame();
     }
+
     private void initializeButtons() {
         easyButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (difficultyLevel != 'E') {
+                    difficultyLevel = 'E';
+                    restartGame();
+                }
             }
         });
 
         hardButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (difficultyLevel != 'H') {
+                    difficultyLevel = 'H';
+                    restartGame();
+                }
             }
         });
 
         surpriseButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (difficultyLevel != 'S') {
+                    difficultyLevel = 'S';
+                    restartGame();
+                }
             }
         });
 
@@ -95,6 +125,7 @@ public class GamePanel extends JPanel implements ActionListener {
             }
         });
     }
+
     private JButton createButton(String text) {
         JButton button = new JButton(text);
         button.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -102,24 +133,28 @@ public class GamePanel extends JPanel implements ActionListener {
         button.setMinimumSize(new Dimension(RIGHT_PANEL_WIDTH, 30));
         return button;
     }
+
     public void startGame() {
         newApple();
         newMouse();
         running = true;
-        timer = new Timer(DELAY,this);
+        timer = new Timer(DELAY, this);
         timer.start();
 
         x[0] = 0;
-        y[0] = TOP_PANEL_HEIGHT + SCREEN_HEIGHT /2;
+        y[0] = TOP_PANEL_HEIGHT + SCREEN_HEIGHT / 2;
     }
+
     public void restartGame() {
+        if (applesEaten > bestScore) {
+            bestScore = applesEaten;
+            bestScoreLabel.setText("Best score: " + bestScore);
+        }
         applesEaten = 0;
         bodyParts = 6;
         direction = 'R';
         running = false;
         scoreLabel.setText("Score: " + applesEaten);
-        newApple();
-        newMouse();
         for (int i = 0; i < bodyParts; i++) {
             x[i] = 0;
             y[i] = TOP_PANEL_HEIGHT + SCREEN_HEIGHT / 2;
@@ -130,8 +165,9 @@ public class GamePanel extends JPanel implements ActionListener {
 
         }
         this.requestFocusInWindow();
-       startGame();
+        startGame();
     }
+
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         draw(g);
@@ -141,7 +177,7 @@ public class GamePanel extends JPanel implements ActionListener {
     }
 
     public void draw(Graphics g) {
-        if(running) {
+        if (running) {
             /*
             for (int i = 0; i < SCREEN_HEIGHT / UNIT_SIZE; i++) {
                 g.drawLine(i * UNIT_SIZE, 0, i * UNIT_SIZE, SCREEN_HEIGHT);
@@ -152,7 +188,7 @@ public class GamePanel extends JPanel implements ActionListener {
             g.fillOval(appleX, appleY, UNIT_SIZE, UNIT_SIZE);
 
             //mouse
-            if(ifMouse()) {
+            if (ifMouse()) {
                 g.setColor(Color.GRAY);
                 g.fillRect(mouseX, mouseY, UNIT_SIZE, UNIT_SIZE);
             }
@@ -166,36 +202,33 @@ public class GamePanel extends JPanel implements ActionListener {
                     g.fillRect(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
                 }
             }
-            g.setColor(Color.red);
-            g.setFont(new Font("Ink Free", Font.BOLD, 20));
-            g.drawString("Score: " + applesEaten, 10, 30);
-        }
-        else{
+        } else {
             gameOver(g);
         }
-
     }
-    public void newApple(){
+
+    public void newApple() {
         appleX = ((random.nextInt((SCREEN_WIDTH - RIGHT_PANEL_WIDTH) / UNIT_SIZE)) * UNIT_SIZE);
         appleY = ((random.nextInt((SCREEN_HEIGHT - TOP_PANEL_HEIGHT) / UNIT_SIZE)) * UNIT_SIZE) + TOP_PANEL_HEIGHT;
     }
 
-    public void newMouse(){
+    public void newMouse() {
         mouseX = ((random.nextInt((SCREEN_WIDTH - RIGHT_PANEL_WIDTH) / UNIT_SIZE)) * UNIT_SIZE);
         mouseY = ((random.nextInt((SCREEN_HEIGHT - TOP_PANEL_HEIGHT) / UNIT_SIZE)) * UNIT_SIZE) + TOP_PANEL_HEIGHT;
     }
 
 
-    public boolean ifMouse(){
+    public boolean ifMouse() {
         return bodyParts % 10 == 0;
     }
+
     public void move() {
-        for(int i=bodyParts; i>0;i--){
-            x[i] = x[i-1];
-            y[i] = y[i-1];
+        for (int i = bodyParts; i > 0; i--) {
+            x[i] = x[i - 1];
+            y[i] = y[i - 1];
         }
 
-        switch (direction){
+        switch (direction) {
             case 'U':
                 y[0] = y[0] - UNIT_SIZE;
                 break;
@@ -212,15 +245,17 @@ public class GamePanel extends JPanel implements ActionListener {
                 break;
         }
     }
+
     public void checkApple() {
-        if((x[0] == appleX) && (y[0] == appleY)){
+        if ((x[0] == appleX) && (y[0] == appleY)) {
             bodyParts++;
             applesEaten++;
             newApple();
         }
     }
+
     public void checkMouse() {
-        if(ifMouse()) {
+        if (ifMouse()) {
             if ((x[0] == mouseX) && (y[0] == mouseY)) {
 
                 bodyParts++;
@@ -229,86 +264,86 @@ public class GamePanel extends JPanel implements ActionListener {
             }
         }
     }
+
     public void checkCollisions() {
         //checks if head collides with body
-        for(int i = bodyParts; i>0; i--){
-            if((x[0] == x[i]) && (y[0] == y[i])){
+        for (int i = bodyParts; i > 0; i--) {
+            if ((x[0] == x[i]) && (y[0] == y[i])) {
                 running = false;
             }
         }
         //checks if head touches left border
-        if(x[0] < 0){
+        if (x[0] < 0) {
             running = false;
         }
         //checks if head touches right border
-        if(x[0] > SCREEN_WIDTH - RIGHT_PANEL_WIDTH){
+        if (x[0] > SCREEN_WIDTH - RIGHT_PANEL_WIDTH) {
             running = false;
         }
         //checks if head touches top border
-        if(y[0] < TOP_PANEL_HEIGHT){
+        if (y[0] < TOP_PANEL_HEIGHT) {
             running = false;
         }
         //checks if head touches bottom border
-        if(y[0] > SCREEN_HEIGHT){
+        if (y[0] > SCREEN_HEIGHT) {
             running = false;
         }
 
-        if(!running){
+        if (!running) {
             timer.stop();
         }
     }
+
     public void gameOver(Graphics g) {
-        //Score
-        g.setColor(Color.red);
-        g.setFont(new Font("Ink Free", Font.BOLD, 40));
-        FontMetrics metrics1 = getFontMetrics(g.getFont());
-        g.drawString("Score: " + applesEaten, ((SCREEN_WIDTH - RIGHT_PANEL_WIDTH) - metrics1.stringWidth("Score: " + applesEaten))/2,g.getFont().getSize());
+        if (applesEaten > bestScore) {
+            bestScore = applesEaten;
+            bestScoreLabel.setText("Best score: " + bestScore);
+        }
+
         //game over text
         g.setColor(Color.red);
         g.setFont(new Font("Ink Free", Font.BOLD, 75));
         FontMetrics metrics2 = getFontMetrics(g.getFont());
-        g.drawString("Game Over", ((SCREEN_WIDTH - RIGHT_PANEL_WIDTH) - metrics2.stringWidth("Game Over"))/2,SCREEN_HEIGHT/2);
+        g.drawString("Game Over", ((SCREEN_WIDTH - RIGHT_PANEL_WIDTH) - metrics2.stringWidth("Game Over")) / 2, SCREEN_HEIGHT / 2);
     }
+
     @Override
     public void actionPerformed(ActionEvent e) {
-        if(running){
+        if (running) {
             move();
             checkApple();
             checkMouse();
             checkCollisions();
             scoreLabel.setText("Score: " + applesEaten); // Score label actualization
-
         }
         repaint();
     }
 
-
     public class MyKeyAdapter extends KeyAdapter {
         @Override
         public void keyPressed(KeyEvent e) {
-            switch (e.getKeyCode()){
+            switch (e.getKeyCode()) {
                 case KeyEvent.VK_LEFT:
-                    if(direction != 'R'){
+                    if (direction != 'R') {
                         direction = 'L';
                     }
                     break;
                 case KeyEvent.VK_RIGHT:
-                    if(direction != 'L'){
+                    if (direction != 'L') {
                         direction = 'R';
                     }
                     break;
                 case KeyEvent.VK_UP:
-                    if(direction != 'D'){
+                    if (direction != 'D') {
                         direction = 'U';
                     }
                     break;
                 case KeyEvent.VK_DOWN:
-                    if(direction != 'U'){
+                    if (direction != 'U') {
                         direction = 'D';
                     }
                     break;
             }
         }
     }
-
 }
