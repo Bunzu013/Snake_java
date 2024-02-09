@@ -29,7 +29,7 @@ public class GamePanel extends JPanel implements ActionListener {
     JLabel bestScoreLabel;
     JButton easyButton;
     JButton hardButton;
-    JButton surpriseButton;
+    JButton mediumButton;
     JButton restartButton;
 
 
@@ -41,7 +41,6 @@ public class GamePanel extends JPanel implements ActionListener {
         this.setFocusable(true);
         this.addKeyListener(new MyKeyAdapter());
 
-        //score panel
         JPanel topPanel = new JPanel(new GridBagLayout());
         topPanel.setPreferredSize(new Dimension(SCREEN_WIDTH, TOP_PANEL_HEIGHT));
         topPanel.setBackground(Color.DARK_GRAY);
@@ -72,13 +71,14 @@ public class GamePanel extends JPanel implements ActionListener {
         rightPanel.setPreferredSize(new Dimension(RIGHT_PANEL_WIDTH, (SCREEN_HEIGHT - TOP_PANEL_HEIGHT)));
         rightPanel.setBackground(Color.DARK_GRAY);
         this.easyButton = createButton("Easy");
+        this.mediumButton = createButton("Medium");
         this.hardButton = createButton("Hard");
-        this.surpriseButton = createButton("Surprise me");
         this.restartButton = createButton("Restart");
 
         rightPanel.add(easyButton);
+        rightPanel.add(mediumButton);
         rightPanel.add(hardButton);
-        rightPanel.add(surpriseButton);
+
         rightPanel.add(Box.createVerticalGlue());
         rightPanel.add(restartButton);
 
@@ -108,11 +108,11 @@ public class GamePanel extends JPanel implements ActionListener {
             }
         });
 
-        surpriseButton.addActionListener(new ActionListener() {
+        mediumButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (difficultyLevel != 'S') {
-                    difficultyLevel = 'S';
+                if (difficultyLevel != 'M') {
+                    difficultyLevel = 'M';
                     restartGame();
                 }
             }
@@ -141,7 +141,7 @@ public class GamePanel extends JPanel implements ActionListener {
         timer = new Timer(DELAY, this);
         timer.start();
 
-        x[0] = 0;
+        x[0] = UNIT_SIZE;
         y[0] = TOP_PANEL_HEIGHT + SCREEN_HEIGHT / 2;
     }
 
@@ -202,19 +202,41 @@ public class GamePanel extends JPanel implements ActionListener {
                     g.fillRect(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
                 }
             }
+            if (difficultyLevel == 'M') {
+                g.setColor(Color.GRAY);
+                g.fillRect(UNIT_SIZE, TOP_PANEL_HEIGHT, SCREEN_WIDTH - UNIT_SIZE, UNIT_SIZE);
+                g.fillRect(UNIT_SIZE, SCREEN_HEIGHT - UNIT_SIZE, SCREEN_WIDTH - 2 * UNIT_SIZE, UNIT_SIZE);
+                g.fillRect(0, TOP_PANEL_HEIGHT, UNIT_SIZE, SCREEN_HEIGHT - 2 * UNIT_SIZE);
+                g.fillRect(SCREEN_WIDTH - RIGHT_PANEL_WIDTH - UNIT_SIZE, TOP_PANEL_HEIGHT, UNIT_SIZE, SCREEN_HEIGHT - 3 * UNIT_SIZE);
+            }
+
         } else {
             gameOver(g);
         }
     }
 
     public void newApple() {
-        appleX = ((random.nextInt((SCREEN_WIDTH - RIGHT_PANEL_WIDTH) / UNIT_SIZE)) * UNIT_SIZE);
-        appleY = ((random.nextInt((SCREEN_HEIGHT - TOP_PANEL_HEIGHT) / UNIT_SIZE)) * UNIT_SIZE) + TOP_PANEL_HEIGHT;
+        if(difficultyLevel == 'E') {
+            appleX = ((random.nextInt((SCREEN_WIDTH - RIGHT_PANEL_WIDTH) / UNIT_SIZE)) * UNIT_SIZE);
+            appleY = ((random.nextInt((SCREEN_HEIGHT - TOP_PANEL_HEIGHT) / UNIT_SIZE)) * UNIT_SIZE) + TOP_PANEL_HEIGHT ;
+        }else {
+            if (difficultyLevel == 'M') {
+                appleX = ((random.nextInt((SCREEN_WIDTH - RIGHT_PANEL_WIDTH - 2 * UNIT_SIZE) / UNIT_SIZE)) * UNIT_SIZE) + UNIT_SIZE;
+                appleY = ((random.nextInt((SCREEN_HEIGHT - TOP_PANEL_HEIGHT - 2 * UNIT_SIZE) / UNIT_SIZE)) * UNIT_SIZE) + TOP_PANEL_HEIGHT + UNIT_SIZE;
+            }
+        }
     }
 
     public void newMouse() {
-        mouseX = ((random.nextInt((SCREEN_WIDTH - RIGHT_PANEL_WIDTH) / UNIT_SIZE)) * UNIT_SIZE);
-        mouseY = ((random.nextInt((SCREEN_HEIGHT - TOP_PANEL_HEIGHT) / UNIT_SIZE)) * UNIT_SIZE) + TOP_PANEL_HEIGHT;
+        if(difficultyLevel == 'E') {
+            mouseX = ((random.nextInt((SCREEN_WIDTH - RIGHT_PANEL_WIDTH) / UNIT_SIZE)) * UNIT_SIZE);
+            mouseY = ((random.nextInt((SCREEN_HEIGHT - TOP_PANEL_HEIGHT) / UNIT_SIZE)) * UNIT_SIZE) + TOP_PANEL_HEIGHT;
+        }else {
+            if (difficultyLevel == 'M') {
+                mouseX = ((random.nextInt((SCREEN_WIDTH - RIGHT_PANEL_WIDTH - 2 * UNIT_SIZE) / UNIT_SIZE)) * UNIT_SIZE) + UNIT_SIZE;
+                mouseY = ((random.nextInt((SCREEN_HEIGHT - TOP_PANEL_HEIGHT - 2 * UNIT_SIZE) / UNIT_SIZE)) * UNIT_SIZE) + TOP_PANEL_HEIGHT + UNIT_SIZE;
+            }
+        }
     }
 
 
@@ -272,25 +294,47 @@ public class GamePanel extends JPanel implements ActionListener {
                 running = false;
             }
         }
-        //checks if head touches left border
-        if (x[0] < 0) {
-           // running = false;
-            x[0] = SCREEN_WIDTH - RIGHT_PANEL_WIDTH;
-        }
-        //checks if head touches right border
-        if (x[0] > SCREEN_WIDTH - RIGHT_PANEL_WIDTH) {
-           // running = false;
-            x[0] = 0;
-        }
-        //checks if head touches top border
-        if (y[0] < TOP_PANEL_HEIGHT) {
-            //running = false;
-            y[0] = SCREEN_HEIGHT;
-        }
-        //checks if head touches bottom border
-        if (y[0] > SCREEN_HEIGHT) {
-         //   running = false;
-            y[0] = TOP_PANEL_HEIGHT;
+        switch (difficultyLevel) {
+            //checks if head touches left border
+            case 'E':
+                if (x[0] < 0) {
+                    // running = false;
+                    x[0] = SCREEN_WIDTH - RIGHT_PANEL_WIDTH;
+                }
+                //checks if head touches right border
+                if (x[0] > SCREEN_WIDTH - RIGHT_PANEL_WIDTH) {
+                    // running = false;
+                    x[0] = 0;
+                }
+                //checks if head touches top border
+                if (y[0] < TOP_PANEL_HEIGHT) {
+                    //running = false;
+                    y[0] = SCREEN_HEIGHT;
+                }
+                //checks if head touches bottom border
+                if (y[0] > SCREEN_HEIGHT) {
+                    //   running = false;
+                    y[0] = TOP_PANEL_HEIGHT;
+                }
+                break;
+            case 'M':
+                if (x[0] < UNIT_SIZE) {
+                     running = false;
+                }
+                //checks if head touches right border
+                if (x[0] > SCREEN_WIDTH - RIGHT_PANEL_WIDTH - 2* UNIT_SIZE) {
+                     running = false;
+                }
+                //checks if head touches top border
+                if (y[0] < TOP_PANEL_HEIGHT + UNIT_SIZE) {
+                    running = false;
+                }
+                //checks if head touches bottom border
+                if (y[0] > SCREEN_HEIGHT - 2*UNIT_SIZE) {
+                      running = false;
+                }
+                break;
+
         }
 
         if (!running) {
