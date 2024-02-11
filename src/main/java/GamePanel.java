@@ -4,10 +4,10 @@ import java.awt.event.*;
 import java.util.Random;
 
 public class GamePanel extends JPanel implements ActionListener {
-    static final int SCREEN_WIDTH = 750;
+    static final int SCREEN_WIDTH = 700;
     static final int SCREEN_HEIGHT = 700;
     static final int TOP_PANEL_HEIGHT = 100;
-    static final int RIGHT_PANEL_WIDTH = 150;
+    static final int RIGHT_PANEL_WIDTH = 100;
     static final int UNIT_SIZE = 25; //size of items
     static final int GAME_UNITS = ((SCREEN_WIDTH - RIGHT_PANEL_WIDTH) * (SCREEN_HEIGHT - TOP_PANEL_HEIGHT)) / UNIT_SIZE;
     static final int DELAY = 75; //the higher the number the slower the game
@@ -21,7 +21,7 @@ public class GamePanel extends JPanel implements ActionListener {
     int mouseX;
     int mouseY;
     char direction = 'R'; // snake begin by going right
-    char difficultyLevel = 'E';
+    char difficultyLevel = 'H';
     boolean running = false;
     Timer timer;
     Random random;
@@ -31,7 +31,6 @@ public class GamePanel extends JPanel implements ActionListener {
     JButton hardButton;
     JButton mediumButton;
     JButton restartButton;
-
 
     GamePanel() {
         long seed = System.currentTimeMillis();
@@ -175,14 +174,12 @@ public class GamePanel extends JPanel implements ActionListener {
             checkMouse();
         }
     }
-
     public void draw(Graphics g) {
         if (running) {
-            /*
             for (int i = 0; i < SCREEN_HEIGHT / UNIT_SIZE; i++) {
                 g.drawLine(i * UNIT_SIZE, 0, i * UNIT_SIZE, SCREEN_HEIGHT);
                 g.drawLine(0, i * UNIT_SIZE, SCREEN_WIDTH, i * UNIT_SIZE);
-            }*/
+            }
             //apple
             g.setColor(Color.red);
             g.fillOval(appleX, appleY, UNIT_SIZE, UNIT_SIZE);
@@ -202,43 +199,85 @@ public class GamePanel extends JPanel implements ActionListener {
                     g.fillRect(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
                 }
             }
-            if (difficultyLevel == 'M') {
+            if (difficultyLevel == 'M' || difficultyLevel == 'H') {
                 g.setColor(Color.GRAY);
                 g.fillRect(UNIT_SIZE, TOP_PANEL_HEIGHT, SCREEN_WIDTH - UNIT_SIZE, UNIT_SIZE);
                 g.fillRect(UNIT_SIZE, SCREEN_HEIGHT - UNIT_SIZE, SCREEN_WIDTH - 2 * UNIT_SIZE, UNIT_SIZE);
                 g.fillRect(0, TOP_PANEL_HEIGHT, UNIT_SIZE, SCREEN_HEIGHT - 2 * UNIT_SIZE);
                 g.fillRect(SCREEN_WIDTH - RIGHT_PANEL_WIDTH - UNIT_SIZE, TOP_PANEL_HEIGHT, UNIT_SIZE, SCREEN_HEIGHT - 3 * UNIT_SIZE);
+                if (difficultyLevel == 'H') {
+                    g.fillRect(UNIT_SIZE * 6, (SCREEN_HEIGHT + TOP_PANEL_HEIGHT) / 2, SCREEN_WIDTH - RIGHT_PANEL_WIDTH - (UNIT_SIZE * 11), UNIT_SIZE);
+                    g.fillRect((SCREEN_WIDTH - RIGHT_PANEL_WIDTH) / 2, UNIT_SIZE * 11, UNIT_SIZE, SCREEN_HEIGHT - TOP_PANEL_HEIGHT - 12 * UNIT_SIZE);
+                }
             }
 
         } else {
             gameOver(g);
         }
     }
-
     public void newApple() {
-        if(difficultyLevel == 'E') {
-            appleX = ((random.nextInt((SCREEN_WIDTH - RIGHT_PANEL_WIDTH) / UNIT_SIZE)) * UNIT_SIZE);
-            appleY = ((random.nextInt((SCREEN_HEIGHT - TOP_PANEL_HEIGHT) / UNIT_SIZE)) * UNIT_SIZE) + TOP_PANEL_HEIGHT ;
-        }else {
-            if (difficultyLevel == 'M') {
+        switch (difficultyLevel) {
+            case 'E':
+                appleX = ((random.nextInt((SCREEN_WIDTH - RIGHT_PANEL_WIDTH) / UNIT_SIZE)) * UNIT_SIZE);
+                appleY = ((random.nextInt((SCREEN_HEIGHT - TOP_PANEL_HEIGHT) / UNIT_SIZE)) * UNIT_SIZE) + TOP_PANEL_HEIGHT;
+                break;
+            case 'M':
                 appleX = ((random.nextInt((SCREEN_WIDTH - RIGHT_PANEL_WIDTH - 2 * UNIT_SIZE) / UNIT_SIZE)) * UNIT_SIZE) + UNIT_SIZE;
                 appleY = ((random.nextInt((SCREEN_HEIGHT - TOP_PANEL_HEIGHT - 2 * UNIT_SIZE) / UNIT_SIZE)) * UNIT_SIZE) + TOP_PANEL_HEIGHT + UNIT_SIZE;
-            }
+                break;
+            case 'H':
+                int tempAppleX;
+                int tempAppleY;
+                do {
+                    tempAppleX = ((random.nextInt((SCREEN_WIDTH - RIGHT_PANEL_WIDTH - 2 * UNIT_SIZE) / UNIT_SIZE)) * UNIT_SIZE) + UNIT_SIZE;
+                 } while (isExcludedX(tempAppleX));
+                 do{
+                     tempAppleY = ((random.nextInt((SCREEN_HEIGHT - TOP_PANEL_HEIGHT - 2 * UNIT_SIZE) / UNIT_SIZE)) * UNIT_SIZE) + TOP_PANEL_HEIGHT + UNIT_SIZE;
+
+                 }while(isExcludedY(tempAppleY));
+                appleX = tempAppleX ;
+                appleY = tempAppleY ;
+                break;
         }
+
     }
 
     public void newMouse() {
-        if(difficultyLevel == 'E') {
-            mouseX = ((random.nextInt((SCREEN_WIDTH - RIGHT_PANEL_WIDTH) / UNIT_SIZE)) * UNIT_SIZE);
-            mouseY = ((random.nextInt((SCREEN_HEIGHT - TOP_PANEL_HEIGHT) / UNIT_SIZE)) * UNIT_SIZE) + TOP_PANEL_HEIGHT;
-        }else {
-            if (difficultyLevel == 'M') {
+        switch (difficultyLevel) {
+            case 'E':
+                mouseX = ((random.nextInt((SCREEN_WIDTH - RIGHT_PANEL_WIDTH) / UNIT_SIZE)) * UNIT_SIZE);
+                mouseY = ((random.nextInt((SCREEN_HEIGHT - TOP_PANEL_HEIGHT) / UNIT_SIZE)) * UNIT_SIZE) + TOP_PANEL_HEIGHT;
+                break;
+            case 'M':
                 mouseX = ((random.nextInt((SCREEN_WIDTH - RIGHT_PANEL_WIDTH - 2 * UNIT_SIZE) / UNIT_SIZE)) * UNIT_SIZE) + UNIT_SIZE;
                 mouseY = ((random.nextInt((SCREEN_HEIGHT - TOP_PANEL_HEIGHT - 2 * UNIT_SIZE) / UNIT_SIZE)) * UNIT_SIZE) + TOP_PANEL_HEIGHT + UNIT_SIZE;
-            }
+                break;
+            case 'H':
+                int tempMouseX;
+                int tempMouseY;
+                do {
+                    tempMouseX = ((random.nextInt((SCREEN_WIDTH - RIGHT_PANEL_WIDTH - 2 * UNIT_SIZE) / UNIT_SIZE)) * UNIT_SIZE) + UNIT_SIZE;
+                } while (isExcludedX(tempMouseX));
+                do {
+                    tempMouseY = ((random.nextInt((SCREEN_HEIGHT - TOP_PANEL_HEIGHT - 2 * UNIT_SIZE) / UNIT_SIZE)) * UNIT_SIZE) + TOP_PANEL_HEIGHT + UNIT_SIZE;
+
+                } while (isExcludedY(tempMouseY));
+                mouseX = tempMouseX;
+                mouseY = tempMouseY;
+                break;
         }
     }
 
+
+    private boolean isExcludedX(int x) {
+        return (x >= UNIT_SIZE * 6 && x <= SCREEN_WIDTH - RIGHT_PANEL_WIDTH - UNIT_SIZE * 11) ||
+                (x >= (SCREEN_WIDTH - RIGHT_PANEL_WIDTH) / 2 && x <= (SCREEN_WIDTH - RIGHT_PANEL_WIDTH) / 2 + UNIT_SIZE);
+    }
+
+    private boolean isExcludedY(int y) {
+        return (y >= (SCREEN_HEIGHT + TOP_PANEL_HEIGHT) / 2 && y <= (SCREEN_HEIGHT + TOP_PANEL_HEIGHT) / 2 + UNIT_SIZE) ||
+                (y >= UNIT_SIZE * 11 && y <= SCREEN_HEIGHT - TOP_PANEL_HEIGHT - 12 * UNIT_SIZE);
+    }
 
     public boolean ifMouse() {
         return bodyParts % 10 == 0;
@@ -334,9 +373,33 @@ public class GamePanel extends JPanel implements ActionListener {
                       running = false;
                 }
                 break;
-
+            case 'H':
+                if (x[0] < UNIT_SIZE) {
+                    running = false;
+                }
+                //checks if head touches right border
+                if (x[0] > SCREEN_WIDTH - RIGHT_PANEL_WIDTH - 2* UNIT_SIZE) {
+                    running = false;
+                }
+                //checks if head touches top border
+                if (y[0] < TOP_PANEL_HEIGHT + UNIT_SIZE) {
+                    running = false;
+                }
+                //checks if head touches bottom border
+                if (y[0] > SCREEN_HEIGHT - 2*UNIT_SIZE) {
+                    running = false;
+                }
+                if (x[0] >= UNIT_SIZE * 6 && x[0] <= SCREEN_WIDTH - RIGHT_PANEL_WIDTH - UNIT_SIZE * 6 &&
+                        y[0] >= (SCREEN_HEIGHT + TOP_PANEL_HEIGHT) / 2 && y[0] <= (SCREEN_HEIGHT + TOP_PANEL_HEIGHT) / 2 ) {
+                    running = false;
+                }
+                if((x[0] >= (SCREEN_WIDTH - RIGHT_PANEL_WIDTH) / 2  &&
+                        x[0] <= (SCREEN_WIDTH - RIGHT_PANEL_WIDTH) / 2 ) &&
+                        y[0] >= (TOP_PANEL_HEIGHT + UNIT_SIZE * 7) && y[0] <= (SCREEN_HEIGHT - 6* UNIT_SIZE)){
+                    running = false;
+                }
+                break;
         }
-
         if (!running) {
             timer.stop();
         }
